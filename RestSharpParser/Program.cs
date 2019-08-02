@@ -3,6 +3,7 @@ using RestSharp;
 using Newtonsoft.Json.Linq;
 using System.Data.SqlClient;
 using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace RestSharpParser
 {
@@ -19,20 +20,18 @@ namespace RestSharpParser
             IRestResponse response = Client.Execute(request);
             var content = response.Content;
 
-            object jsonContent = JsonConvert.DeserializeObject(content);
+            dynamic jsonDictionary = JObject.Parse(content);
 
-            //Console.WriteLine(content["marketsummaryresponse.result.fullExchangeName"][0]);
+            JArray result = content["result"];
 
-            JArray jsonArray = JArray.Parse(content);
-
-            string _connection = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog = RestSharpTable; Integrated Security = True; Connect Timeout = 30; Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
+            /*string _connection = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog = RestSharpTable; Integrated Security = True; Connect Timeout = 30; Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
 
             using (SqlConnection connection = new SqlConnection(_connection))
             {
                 connection.Open();
                 Console.WriteLine("Connection open.");
 
-                foreach (JToken data in jsonArray)
+                foreach(KeyValuePair <string, object> in jsonDictionary)
                 {
                     SqlCommand insert = new SqlCommand("INSERT INTO dbo.RestSharpTable(Time_Scraped, Stock_Name, Stock_Symbol, Last_Price, Change, Change_Percent) VALUES(@time_scraped, @stock_symbol, @last_price, @change, @change_percent), _connection;");
 
@@ -48,7 +47,7 @@ namespace RestSharpParser
 
                 connection.Close();
                 Console.WriteLine("Connection closed.");
-            }
+            }*/
         }
 
     }
