@@ -10,17 +10,17 @@ namespace RestSharpParser
     class Database
     {
       private static string _connection = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog = RestSharpTable; Integrated Security = True; Connect Timeout = 30; Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
-        public static void InsertScrapeToDatabase(RSStock stock)
+        public static void InsertScrapeToDatabase(dynamic stock)
         {
             DataToTable(stock);
         }
 
-        public static void LatestScrapeToDatabase(RSStock stock)
+        public static void LatestScrapeToDatabase(dynamic stock)
         {
             LastScrapeToDatabase(stock);
         }
 
-        private static void LastScrapeToDatabase(RSStock stock)
+        private static void LastScrapeToDatabase(dynamic stock)
         {
             string lastScrape = @"IF EXISTS(SELECT* FROM RestSharpTable WHERE Stock Symbol = @stock_symbol)
                                     UPDATE HAPStockTable
@@ -59,7 +59,7 @@ namespace RestSharpParser
             }
         }
 
-        private static void DataToTable(RSStock stock)
+        private static void DataToTable(dynamic stock)
         {
             using (SqlConnection connection = new SqlConnection(_connection))
             {

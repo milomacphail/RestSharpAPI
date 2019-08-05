@@ -11,50 +11,48 @@ namespace RestSharpParser
     {
         static void Main(string[] args)
         {
-            var Client = new RestClient("https://apidojo-yahoo-finance-v1.p.rapidapi.com/market/get-summary?region=US&lang=en");
-            RestRequest request = new RestRequest(Method.GET);
+            var apiScrape = new CallData();
+            scrapeAPI.getScrape(apiScrape);
+        }
 
-            request.AddHeader("X-RapidAPI-Host", "apidojo-yahoo-finance-v1.p.rapidapi.com");
-            request.AddHeader("X-RapidAPI-Key", "766253babbmsh7dc7313fc6fb941p1f3b2fjsn3e5e1b4f90ba");
-            request.AddHeader("content-type", "application/json");
-            IRestResponse response = Client.Execute(request);
-            var content = response.Content;
-
-            dynamic jsonDictionary = JObject.Parse(content);
-
-            JArray result = content["result"];
-
-            /*string _connection = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog = RestSharpTable; Integrated Security = True; Connect Timeout = 30; Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
-
-            using (SqlConnection connection = new SqlConnection(_connection))
+        class scrapeAPI : Database
+        {
+            public static void getScrape(CallData scrape)
             {
-                connection.Open();
-                Console.WriteLine("Connection open.");
 
-                foreach(KeyValuePair <string, object> in jsonDictionary)
+                var Client = new RestClient("https://www.worldtradingdata.com/api/v1/stock");
+                var Key = "x6PxBoRCzbHQ89HcQQiLjmmyAyicUoAuWpIyiFAVKaouhZSJQimIJiCi6gaz";
+
+                RestRequest request = new RestRequest("stock?symbol=AAPL,MSFT,HSBA.L&api_token={token_key}", Method.GET);
+                request.AddParameter("token_key", Key);
+                request.AddHeader("content-type", "application/json");
+
+                IRestResponse response = Client.Execute(request);
+                var content = JsonConvert.DeserializeObject<dynamic>(response.Content);
+
+
+                for (int stockResponseIndex = 0; stockResponseIndex < scrape.Stocks.Count; stockResponseIndex++)
                 {
-                    SqlCommand insert = new SqlCommand("INSERT INTO dbo.RestSharpTable(Time_Scraped, Stock_Name, Stock_Symbol, Last_Price, Change, Change_Percent) VALUES(@time_scraped, @stock_symbol, @last_price, @change, @change_percent), _connection;");
+                    dynamic timescraped = DateTime.Now;
+                    dynamic symbol = content.data[stockResponseIndex].symbol.ToString();
+                    dynamic lastprice = content.data[stockResponseIndex].lastPrice.ToString();
+                    dynamic change = content.data[stockResponseIndex].change.ToString();
+                    dynamic changepercent = content.data[stockResponseIndex].change_percent.ToString();
 
-                    insert.Parameters.AddWithValue("@time_scraped", DateTime.Now);
-                    insert.Parameters.AddWithValue("@stock_name", content["marketsummaryresponse.result.fullExchangeName"]);
-                    insert.Parameters.AddWithValue("stock_symbol", content["symbol"]);
-                    insert.Parameters.AddWithValue("@last_price", content["regularMarketPricefmt"]);
-                    insert.Parameters.AddWithValue("@change", content["regularMarketChange.fmt"]);
-                    insert.Parameters.AddWithValue("@change_percent", content["regularMarketChangePercent.fmt"]);
+                    var responseObject = new RSStock(timescraped, symbol, lastprice, change, changepercent);
+                    scrape.StockList.Add(responseObject);
 
-                    insert.ExecuteNonQuery();
+                    InsertScrapeToDatabase(responseObject);
+                    LatestScrapeToDatabase(responseObject);
                 }
 
-                connection.Close();
-                Console.WriteLine("Connection closed.");
-            }*/
+
+            }
+
         }
 
     }
 }
-            
-               
-
             
 
     
